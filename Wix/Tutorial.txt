@@ -1,0 +1,95 @@
+Every Wix project begins with an XML declaration and a Wix element.
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    </Wix>
+
+At this point, you could also add the RequiredVersion attribute to the Wix element. 
+Given a Wix toolset version number, such as "3.0.5419.0", it won't let compile the .wxs file unless they have the version or higher installed.
+
+Product element
+    <Wix ...>
+        <Product    Id="*"
+                    Name="Awesome Software"
+                    Language="1033"
+                    Version="1.0.0.0"
+                    Manufacturer="Awesome company"
+                    UpgradeCode="B414C827-8D81-4B4A-B3B6-338C06DE3A11"
+        </Product>
+    </Wix>
+
+    This is where you define the charateristics of the software you're installing: name, languager, version and manufacturer.
+    Most of the time, these values will stay the same from one build of your project to the next. The exception is when you want to
+    increment the software's version or indicate that it's an upgrade of a previous installation. In that case you need only change Version, and sometime Id.
+
+        Id: represent product code of Software. It's always a unique number-a GUID- Windows will use to identify this software. Id can hardcode or put an asterisk, with asterisk Wix will pick a new
+        GUID for each time we compile the project
+
+            <Wix ...>
+                <Product    Id="*"
+                            Name="Awesome Software"
+                            Language="1033"
+                            Version="1.0.0.0"
+                            Manufacturer="Awesome company"
+                            UpgradeCode="B414C827-8D81-4B4A-B3B6-338C06DE3A11"
+                </Product>
+             </Wix>
+
+        Name: define name of software
+        Language: attribute is used to display error messages and progress infomation in the specified languager to the user.
+        Version: is used version number of software
+        Manufacturer: tell the user who this software is from and usually contains the name of company.
+        UpgradeCode: this should be set to a GUID and will identify your product across version releases. it should stay the same even when the Product Id
+                    and version change. Windows will user this number to keep track of all the software installed on the machine
+
+
+Package element
+
+    <Wix ...>
+        <Product ...>
+            <Package    Compressed="yes"
+                        InstallerVersion="301"
+                        Manufacturer="Awesome Compnay"
+                        Description="Installs Awesome Software"
+                        Keywords="Practice, Install, MSI"
+                        Comments="(c) 2010 Awesome Compnay" />
+        </Product>
+    </Wix>
+
+    Compressed: only this is requeired. By setting it to yes, you are telling the installer to packge all of the MSI's resources into CAB files. Later we define these CAB files with Media element.
+    InstallerVersion:   can be set to require a specifix version of msi exec.exe. If they have an older version, Windows Installer will display a MessageBox telling them that they need to upgrade
+
+Media element
+    The files that you intend to install are bundled up into CAB files. For each media element be added to your Wix markup, a new CAB file will be created.
+    Generally, you should limit the number of files you put into a single CAB file to 64K or less and no  single file should be larger than 2 GB.
+    Media elements come nested inside the Product element alongside the Package element
+
+    <Wix ... >
+        <Product ... >
+            <Package .../>
+            <Media  Id="1"
+                    Cabinet="media1.cab"
+                    EmbedCab="yes"  />
+        </Product>
+    </Wix>
+
+    Each media element gets a unique Id attribute to distinguish it in the MSI Media table. It must be a positive integer. First Media element should always use an Id of 1
+    Cabinet:    set nam of CAB file, You wpn't see this unless you set EmbedCab to no, in which case the file won't  be bundled inside the MSI package.
+                This is atypical, but might be done to split the installation files onto several disks. Setting EmbedCab to no will produce a visible CAB file that must be 
+                provided alongside the MSI file during an installation.    
+
+    If you do choose to split the installation up into several physical disks, you'll want to  add the DiskPrompt and VolumeLabel
+
+    <Property   Id="DiskPrompt"
+                Value=Amazing Software" />
+    <Media  Id="1"
+            Cabinet="media1.cab"
+            EmbedCab="no"
+            DiskPrompt="Disk 1"
+            VolumeLabel="Disk1"
+
+    <Media  Id="2"
+            Cabinet="media2.cab"
+            EmbedCab="no"
+            DiskPrompt="Disk 2"
+            VolumeLabel="Disk2" />
+
